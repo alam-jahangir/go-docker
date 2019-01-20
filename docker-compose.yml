@@ -1,0 +1,11 @@
+version: '3'
+services:
+  web:
+    container_name: "go_docker"
+    build: .
+    volumes:
+      - ".:${GOPATH}"
+    ports:
+      - "3030:3001"
+    environment:
+      WORKDIR: "${GOPATH}/Go_Docker/src/docker"
