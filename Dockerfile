@@ -25,7 +25,8 @@ ADD src src
 RUN apk update && \
   apk add git && \
   go get github.com/garyburd/redigo/redis && \
-  go get github.com/google/codesearch/index
+  go get github.com/google/codesearch/index && \
+  go get -u github.com/go-sql-driver/mysql
 
 # ======================End GO ================================
 
