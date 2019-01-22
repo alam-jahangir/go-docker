@@ -18,11 +18,11 @@ type Employee struct {
 
 func dbConn() (db *sql.DB) {
 	dbDriver := "mysql"
-	dbHost := ""//os.Getenv("DB_HOST")
+	dbHost := os.Getenv("DB_HOST")
 	dbUser := os.Getenv("DB_USER_NAME")
 	dbPass := os.Getenv("DB_PASSWORD")
 	dbName := os.Getenv("DB_NAME")
-	db, err := sql.Open(dbDriver, dbUser+":"+dbPass+"@"+dbHost+"/"+dbName)
+	db, err := sql.Open(dbDriver, dbUser+":"+dbPass+"@tcp("+dbHost+")/"+dbName)
 	if err != nil {
 		panic(err.Error())
 	}
@@ -30,7 +30,7 @@ func dbConn() (db *sql.DB) {
 	return db
 }
 
-//var tmpl = template.Must(template.ParseGlob("form/*"))
+var tmpl = template.Must(template.ParseGlob("src/view/employee/*.tmpl"))
 
 func Index(w http.ResponseWriter, r *http.Request) {
 	db := dbConn()
@@ -40,19 +40,24 @@ func Index(w http.ResponseWriter, r *http.Request) {
 	}
 	emp := Employee{}
 	res := []Employee{}
+	//log.Println("Query Executed");
+	
 	for selDB.Next() {
 		var id int
 		var name, city string
 		err = selDB.Scan(&id, &name, &city)
+		//log.Println(name+" "+city)
 		if err != nil {
 			panic(err.Error())
 		}
 		emp.Id = id
 		emp.Name = name
 		emp.City = city
+		//log.Println(emp.Name+" "+emp.City)
 		res = append(res, emp)
 	}
-	tmpl, _ := template.ParseFiles("form/Index.tmpl")
+	log.Println("Start Templating");
+	//tmpl, _ := template.ParseFiles("form/Index.tmpl")
 	tmpl.ExecuteTemplate(w, "Index", res)
 	defer db.Close()
 }
@@ -76,13 +81,13 @@ func Show(w http.ResponseWriter, r *http.Request) {
 		emp.Name = name
 		emp.City = city
 	}
-	tmpl, _ := template.ParseFiles("form/Show.tmpl")
+	//tmpl, _ := template.ParseFiles("form/Show.tmpl")
 	tmpl.ExecuteTemplate(w, "Show", emp)
 	defer db.Close()
 }
 
 func New(w http.ResponseWriter, r *http.Request) {
-	tmpl, _ := template.ParseFiles("form/New.tmpl")
+	//tmpl, _ := template.ParseFiles("form/New.tmpl")
 	tmpl.ExecuteTemplate(w, "New", nil)
 }
 
@@ -105,7 +110,7 @@ func Edit(w http.ResponseWriter, r *http.Request) {
 		emp.Name = name
 		emp.City = city
 	}
-	tmpl, _ := template.ParseFiles("form/Edit.tmpl")
+	//tmpl, _ := template.ParseFiles("form/Edit.tmpl")
 	tmpl.ExecuteTemplate(w, "Edit", emp)
 	defer db.Close()
 }
@@ -166,23 +171,3 @@ func main() {
 	http.HandleFunc("/delete", Delete)
 	http.ListenAndServe(":8080", nil)
 }
-
-/*
-func main() {
-	var PORT string
-	if PORT = os.Getenv("PORT"); PORT == "" {
-		PORT = "3001"
-	}
-
-	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		fmt.Fprint(w, "Go_Docker");
-		dbHost := os.Getenv("DB_HOST")
-		dbUser := os.Getenv("DB_USER_NAME")
-		dbPass := os.Getenv("DB_PASSWORD")
-		dbName := os.Getenv("DB_NAME")
-		log.Println(dbHost + " " + dbUser + " " + dbPass + " " + dbName)
-		fmt.Fprintf(w, "PORT :%s\n, Hello World from path: %s\n", PORT, r.URL.Path)
-	})
-
-	http.ListenAndServe(":8080", nil)
-}*/
